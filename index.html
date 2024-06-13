@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZFS Cheatsheet</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: #e0e0e0;
+    margin: 0;
+    padding: 0;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+.header {
+    text-align: center;
+    padding: 20px 0;
+    font-size: 2em;
+    color: #4CAF50;
+}
+nav {
+    text-align: center;
+    margin-bottom: 20px;
+}
+nav a {
+    margin: 0 10px;
+    color: #4CAF50;
+    text-decoration: none;
+}
+nav a:hover {
+    text-decoration: underline;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+th, td {
+    padding: 12px;
+    border: 1px solid #333;
+    text-align: left;
+}
+th {
+    background-color: #333;
+    color: #4CAF50;
+}
+tr:nth-child(even) {
+    background-color: #1e1e1e;
+}
+tr:hover {
+    background-color: #333;
+}
+strong {
+    color: #e0e0e0;
+}
+.section-title {
+    background-color: #4CAF50;
+    color: #121212;
+    text-align: center;
+    padding: 10px 0;
+    margin-top: 20px;
+}
+.command {
+    background-color: #333;
+    color: #4CAF50;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <p class="header">ZFS Cheatsheet</p>
+    <nav>
+        <a href="#directories-files">Directories and Files</a>
+        <a href="#states">States</a>
+        <a href="#scrubbing-resilvering">Scrubbing and Resilvering</a>
+        <a href="#zfs-devices">ZFS Devices</a>
+        <a href="#storage-pools">Storage Pools</a>
+        <a href="#filesystem">Filesystem</a>
+        <a href="#zfs-tasks">ZFS Tasks</a>
+    </nav>
+    <p>This is a quick and dirty cheatsheet on Sun's ZFS</p>
+    <table>
+        <tr id="directories-files">
+            <th colspan="2">Directories and Files</th>
+        </tr>
+        <tr>
+            <td><strong>Error Messages</strong></td>
+            <td>/var/adm/messages<br>console</td>
+        </tr>
+        <tr id="states" class="section-title">
+            <th colspan="2">States</th>
+        </tr>
+        <tr>
+            <td><strong>DEGRADED</strong></td>
+            <td>One or more top-level devices is in the degraded state because they have become offline. Sufficient replicas exist to keep functioning.</td>
+        </tr>
+        <tr>
+            <td><strong>FAULTED</strong></td>
+            <td>One or more top-level devices is in the faulted state because they have become offline. Insufficient replicas exist to keep functioning.</td>
+        </tr>
+        <tr>
+            <td><strong>OFFLINE</strong></td>
+            <td>The device was explicitly taken offline by the "<span class="command">zpool offline</span>" command.</td>
+        </tr>
+        <tr>
+            <td><strong>ONLINE</strong></td>
+            <td>The device is online and functioning.</td>
+        </tr>
+        <tr>
+            <td><strong>REMOVED</strong></td>
+            <td>The device was physically removed while the system was running.</td>
+        </tr>
+        <tr>
+            <td><strong>UNAVAIL</strong></td>
+            <td>The device could not be opened.</td>
+        </tr>
+        <tr id="scrubbing-resilvering" class="section-title">
+            <th colspan="2">Scrubbing and Resilvering</th>
+        </tr>
+        <tr>
+            <td><strong>Scrubbing</strong></td>
+            <td>Examines all data to discover hardware faults or disk failures. Only one scrub may be running at one time. You can manually scrub.</td>
+        </tr>
+        <tr>
+            <td><strong>Resilvering</strong></td>
+            <td>Rebuilds or resyncs data onto new disks in an array. It rebuilds only the required data, reducing resync time. Resilvering is automatic when you replace disks.</td>
+        </tr>
+        <tr id="zfs-devices" class="section-title">
+            <th colspan="2">ZFS Devices</th>
+        </tr>
+        <tr>
+            <td><strong>Disk</strong></td>
+            <td>A physical disk drive.</td>
+        </tr>
+        <tr>
+            <td><strong>File</strong></td>
+            <td>The absolute path of pre-allocated files/images.</td>
+        </tr>
+        <tr>
+            <td><strong>Mirror</strong></td>
+            <td>Standard RAID-1 mirror.</td>
+        </tr>
+        <tr>
+            <td><strong>Raidz1/2/3</strong></td>
+            <td>Non-standard distributed parity-based software RAID levels.</td>
+        </tr>
+        <tr>
+            <td><strong>Spare</strong></td>
+            <td>Hard drives marked as "hot spare" for ZFS RAID.</td>
+        </tr>
+        <tr>
+            <td><strong>Cache</strong></td>
+            <td>ZFS uses L2ARC for caching both least recently used (LRU) and least frequently used (LFU) block requests.</td>
+        </tr>
+        <tr>
+            <td><strong>Log</strong></td>
+            <td>ZFS Intent Log (ZIL) and Separate Intent Log (SLOG) for caching synchronous parts before flushing to disk.</td>
+        </tr>
+        <tr id="storage-pools" class="section-title">
+            <th colspan="2">Storage Pools</th>
+        </tr>
+        <tr>
+            <td><strong>Displaying</strong></td>
+            <td><span class="command">zpool list</span><br><span class="command">zpool list -o name,size,altroot</span></td>
+        </tr>
+        <tr>
+            <td><strong>Status</strong></td>
+            <td><span class="command">zpool status</span><br><span class="command">zpool status -xv</span></td>
+        </tr>
+        <tr>
+            <td><strong>Statistics</strong></td>
+            <td><span class="command">zpool iostat -v 5 5</span></td>
+        </tr>
+        <tr>
+            <td><strong>History</strong></td>
+            <td><span class="command">zpool history -il</span></td>
+        </tr>
+        <tr>
+            <td><strong>Creating</strong></td>
+            <td><span class="command">zpool create -n data01 c1t0d0s0</span><br><span class="command">zpool create data01 /zfs1/disk01 /zfs1/disk02</span></td>
+        </tr>
+        <tr>
+            <td><strong>Destroying</strong></td>
+            <td><span class="command">zpool destroy /zfs1/data01</span><br><span class="command">zpool import -f -D -d /zfs1 data031</span></td>
+        </tr>
+        <tr>
+            <td><strong>Adding</strong></td>
+            <td><span class="command">zpool add data01 c2t0d0</span></td>
+        </tr>
+        <tr>
+            <td><strong>Resizing</strong></td>
+            <td>Enable "<span class="command">autoexpand</span>" feature before replacing the first disk.</td>
+        </tr>
+        <tr>
+            <td><strong>Removing</strong></td>
+            <td><span class="command">zpool remove data01 c2t0d0</span></td>
+        </tr>
+        <tr>
+            <td><strong>Clearing Faults</strong></td>
+            <td><span class="command">zpool clear data01</span><br><span class="command">zpool clear data01 c2t0d0</span></td>
+        </tr>
+        <tr>
+            <td><strong>Attaching (mirror)</strong></td>
+            <td><span class="command">zpool attach data01 c2t0d0 c3t0d0</span></td>
+        </tr>
+        <tr>
+            <td><strong>Detaching (mirror)</strong></td>
+            <td><span class="command">zpool detach data01 c2t0d0</span></td>
+        </tr>
+        <tr>
+            <td><strong>Onlining</strong></td>
+            <td><span class="command">zpool online data01 c2t0d0</span></td>
+        </tr>
+        <tr>
+            <td><strong>Offlining</strong></td>
+            <td><span class="command">zpool offline data01 c2t0d0</span><br><span class="command">zpool offline data01 -t c2t0d0</span></td>
+        </tr>
+        <tr>
+            <td><strong>Replacing</strong></td>
+            <td><span class="command">zpool replace data03 c2t0d0</span><br><span class="command">zpool replace data03 c2t0d0 c3t0d0</span></td>
+        </tr>
+        <tr>
+            <td><strong>Scrubbing</strong></td>
+            <td><span class="command">zpool scrub data01</span><br><span class="command">zpool scrub -s data01</span></td>
+        </tr>
+        <tr>
+            <td><strong>Exporting</strong></td>
+            <td><span class="command">zpool export data01</span><br><span class="command">zpool import</span></td>
+        </tr>
+        <tr>
+            <td><strong>Importing</strong></td>
+            <td><span class="command">zpool import data01</span><br><span class="command">zpool import -d /zfs</span><br><span class="command">zpool import -f -D -d /zfs1 data03</span></td>
+        </tr>
+        <tr>
+            <td><strong>Getting Parameters</strong></td>
+            <td><span class="command">zpool get all data01</span></td>
+        </tr>
+        <tr>
+            <td><strong>Setting Parameters</strong></td>
+            <td><span class="command">zpool set autoreplace=on data01</span></td>
+        </tr>
+        <tr>
+            <td><strong>Upgrade</strong></td>
+            <td><span class="command">zpool upgrade -v</span><br><span class="command">zpool upgrade -a</span><br><span class="command">zpool upgrade data01</span><br><span class="command">zpool upgrade -V 10 data01</span></td>
+        </tr>
+        <tr id="filesystem" class="section-title">
+            <th colspan="2">Filesystem</th>
+        </tr>
+        <tr>
+            <td><strong>Displaying</strong></td>
+            <td><span class="command">zfs list</span><br><span class="command">zfs list -t filesystem</span><br><span class="command">zfs list -t snapshot</span><br><span class="command">zfs list -t volume</span></td>
+        </tr>
+        <tr>
+            <td><strong>Creating</strong></td>
+            <td><span class="command">zfs create data01/apache</span><br><span class="command">zfs create -o mountpoint=/oracle data01/oracle</span><br><span class="command">zfs create -V 50mb data01/swap</span></td>
+        </tr>
+        <tr>
+            <td><strong>Destroying</strong></td>
+            <td><span class="command">zfs destroy data01/oracle</span><br><span class="command">zfs destroy -r data01/oracle</span><br><span class="command">zfs destroy -R data01/oracle</span></td>
+        </tr>
+        <tr>
+            <td><strong>Mounting</strong></td>
+            <td><span class="command">zfs mount data01</span><br><span class="command">zfs mount -o mountpoint=/tmpmnt data01/oracle</span></td>
+        </tr>
+        <tr>
+            <td><strong>Unmounting</strong></td>
+            <td><span class="command">zfs umount data01</span></td>
+        </tr>
+        <tr>
+            <td><strong>Share</strong></td>
+            <td><span class="command">zfs share data01</span><br><span class="command">zfs set sharenfs=on data01</span><br><span class="command">zfs set sharenfs="rw=@10.85.87.0/24" data01/apache</span></td>
+        </tr>
+        <tr>
+            <td><strong>Unshare</strong></td>
+            <td><span class="command">zfs unshare data01</span><br><span class="command">zfs set sharenfs=off data01</span></td>
+        </tr>
+        <tr>
+            <td><strong>Snapshotting</strong></td>
+            <td><span class="command">zfs snapshot data01@10022010</span><br><span class="command">zfs snapshot data01@10022010 data01@keep_this</span><br><span class="command">zfs destroy data01@10022010</span></td>
+        </tr>
+        <tr>
+            <td><strong>Rollback</strong></td>
+            <td><span class="command">zfs rollback data01@10022010</span></td>
+        </tr>
+        <tr>
+            <td><strong>Cloning/Promoting</strong></td>
+            <td><span class="command">zfs clone data01@10022010 data03/clone</span><br><span class="command">zfs clone -o mountpoint=/clone data01@10022010 data03/clone</span><br><span class="command">zfs promote data03/clone</span></td>
+        </tr>
+        <tr>
+            <td><strong>Renaming</strong></td>
+            <td><span class="command">zfs rename data03/ora_disk01 data03/ora_d01</span></td>
+        </tr>
+        <tr>
+            <td><strong>Compression</strong></td>
+            <td><span class="command">zfs set compression=lzjb data03/apache</span><br><span class="command">zfs get compressratio data03/apache</span></td>
+        </tr>
+        <tr>
+            <td><strong>Deduplication</strong></td>
+            <td><span class="command">zfs set dedup=on data01/text_files</span><br><span class="command">zfs get dedupratio data01/text_files</span></td>
+        </tr>
+        <tr>
+            <td><strong>Getting Parameters</strong></td>
+            <td><span class="command">zfs get all data03/oracle</span><br><span class="command">zfs get setuid data03/oracle</span><br><span class="command">zfs get compression</span></td>
+        </tr>
+        <tr>
+            <td><strong>Setting Parameters</strong></td>
+            <td><span class="command">zfs set quota=50M data03/oracle</span><br><span class="command">zfs set quota=none data03/oracle</span></td>
+        </tr>
+        <tr>
+            <td><strong>Inherit</strong></td>
+            <td><span class="command">zfs inherit compression data03/oracle</span></td>
+        </tr>
+        <tr>
+            <td><strong>Upgrade</strong></td>
+            <td><span class="command">zfs upgrade -v</span><br><span class="command">zfs upgrade</span><br><span class="command">zfs upgrade -V &lt;version&gt; data03/oracle</span></td>
+        </tr>
+        <tr>
+            <td><strong>Send/Receive</strong></td>
+            <td><span class="command">zfs send master/data@1 | zfs receive slave/data</span><br><span class="command">zfs send -i master/data@1 master/data@2 | zfs receive slave/data</span></td>
+        </tr>
+        <tr id="zfs-tasks" class="section-title">
+            <th colspan="2">ZFS Tasks</th>
+        </tr>
+        <tr>
+            <td><strong>Replace Failed Disk</strong></td>
+            <td><span class="command">zpool replace data01 c1t0d0</span><br><span class="command">zpool replace data01 c1t0d0 c1t1d0</span><br><span class="command">zpool clear data01</span><br><span class="command">zpool scrub data01</span></td>
+        </tr>
+        <tr>
+            <td><strong>Expand a Pool's Capacity</strong></td>
+            <td><span class="command">zpool replace data01 c1t0d0 c2t0d0</span><br><span class="command">zpool set autoexpand=on data01</span></td>
+        </tr>
+        <tr>
+            <td><strong>Install the Boot Block</strong></td>
+            <td><span class="command">sparc - installboot -F zfs /usr/platform/`uname -i`/lib/fs/zfs/bootblk /dev/rdsk/c0t1d0</span><br><span class="command">x86 - installgrub /boot/grub/stage1 /boot/grub/stage2 /dev/rdsk/c0t1d0s0</span></td>
+        </tr>
+        <tr>
+            <td><strong>Lost Root Password</strong></td>
+            <td><span class="command">ok&gt; boot -F failsafe</span><br><span class="command">cd /a/etc</span><br><span class="command">vi passwd|shadow</span><br><span class="command">init 6</span><br><br><span class="command">ok boot cdrom|net -s</span><br><span class="command">zpool import -R /a rpool</span><br><span class="command">zfs mount rpool/ROOT/zfsBE</span><br><span class="command">cd /a/etc</span><br><span class="command">vi passwd|shadow</span><br><span class="command">init 6</span></td>
+        </tr>
+        <tr>
+            <td><strong>Primary Mirror Disk in Root is Unavailable or Fails</strong></td>
+            <td><span class="command">ok&gt; boot disk1</span><br><span class="command">zpool offline rpool c0t0d0s0</span><br><span class="command">cfgadm -c unconfigure c1::dsk/c0t0d0</span><br><br><span class="command">cfgadm -c configure c1::dsk/c0t0d0</span><br><span class="command">zpool online rpool c0t0d0</span><br><br><span class="command">zpool replace rpool c0t0d0s0</span><br><br>If the replace above fails, detach and reattach the primary mirror:<br><span class="command">zpool detach rpool c0t0d0s0</span><br><span class="command">zpool attach rpool c0t1d0s0 c0t0d0s0</span><br><br>Make checks:<br><span class="command">zpool status rpool</span><br><br>Don't forget to add the boot block (see above).</td>
+        </tr>
+        <tr>
+            <td><strong>Resize Swap Area (and Dump Areas)</strong></td>
+            <td>First, record the size and if it is being used:<br><span class="command">swap -l</span><br><br>Resize the swap area, first by removing it:<br><span class="command">swap -d /dev/zvol/dsk/rpool/swap</span><br><span class="command">zpool set volsize=2G rpool/swap</span><br><br>Now activate the swap and check the size:<br><span class="command">swap -a /dev/zvol/dsk/rpool/swap</span><br><span class="command">swap -l</span><br><br>If you cannot delete the original swap area due to being too busy, simply add another swap area. The same procedure is used for dump areas but using the <span class="command">dumpadm</span> command.</td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
